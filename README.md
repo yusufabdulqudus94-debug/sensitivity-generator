@@ -2,7 +2,7 @@
 
 A simple web app that suggests starting sensitivity settings for Free Fire based on your device, screen size, performance, play style, finger setup and swipe speed.
 
-It outputs values (1-100) for General, Red Dot, 2x Scope, 4x Scope, Sniper Scope, AWM Scope and Free Look. You can copy them or download them as a text file.
+It outputs values (1-200) for General, Red Dot, 2x Scope, 4x Scope, Sniper Scope, AWM Scope and Free Look. You can copy them or download them as a text file.
 
 > These are suggested starting points, not official Garena numbers. Test in the Training Ground and adjust by 3 to 5 points at a time.
 
