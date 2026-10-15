@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Fire Sensitivity Generator</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff7a1a">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#14110f; --panel:#1f1a17; --line:#3a312b; --text:#f3ece4; --muted:#a89c90;
+  --accent:#ff7a1a; --accent-ink:#1a0e04; --ok:#5fd38d;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f6f1ea;--panel:#fff;--line:#ddd2c5;--text:#201a15;--muted:#6f6357;--accent:#d9530b;--accent-ink:#fff;--ok:#1d8a4b;color-scheme:light}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.05;margin:8px 0 6px;letter-spacing:-.02em;font-weight:800}
+.lead{color:var(--muted);margin:0 0 24px;max-width:52ch}
+form,.result{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label{display:block;font-weight:600;font-size:.92rem;margin-bottom:4px}
+select,input{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hint{color:var(--muted);font-size:.8rem;margin-top:3px}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.result{margin-top:22px}
+.result[hidden]{display:none}
+.row{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;align-items:center;padding:7px 0}
+.row .name{font-weight:600}
+.bar{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s}
+.val{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.group{margin:14px 0 4px;font-weight:800;color:var(--accent)}
+.note{color:var(--muted);font-size:.85rem;margin-top:14px}
+.toast{color:var(--ok);min-height:1.4em;margin-top:8px;font-weight:600}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Free Fire sensitivity generator</h1>
+  <p class="lead">Tell us about your phone and how you play. Get a starting set of sensitivity values to copy into Free Fire settings, then fine-tune in training mode.</p>
+
+  <form id="f" autocomplete="off">
+    <div class="grid">
+      <div>
+        <label for="device">Device type</label>
+        <select id="device">
+          <option value="phone">Phone</option>
+          <option value="tablet">Tablet / iPad</option>
+        </select>
+      </div>
+      <div>
+        <label for="screen">Screen size (inches)</label>
+        <input id="screen" type="number" min="4" max="13" step="0.1" value="6.5" required>
+        <div class="hint">Phones are usually 5.5 to 7. Tablets 8 to 12.9.</div>
+      </div>
+      <div>
+        <label for="perf">Phone performance</label>
+        <select id="perf">
+          <option value="low">Low (2-3 GB RAM, lags sometimes)</option>
+          <option value="mid" selected>Medium (4-6 GB RAM)</option>
+          <option value="high">High (8 GB+ RAM, smooth 60+ FPS)</option>
+        </select>
+      </div>
+      <div>
+        <label for="style">Play style</label>
+        <select id="style">
+          <option value="rush">Rusher (close fights, fast aim)</option>
+          <option value="balanced" selected>Balanced (all ranges)</option>
+          <option value="sniper">Sniper (long range, control)</option>
+          <option value="head">Headshot focus (precise, drag)</option>
+        </select>
+      </div>
+      <div>
+        <label for="claw">Controls</label>
+        <select id="claw">
+          <option value="2">2 fingers</option>
+          <option value="3" selected>3 fingers</option>
+          <option value="4">4 fingers (claw)</option>
+        </select>
+      </div>
+      <div>
+        <label for="hand">Finger speed</label>
+        <select id="hand">
+          <option value="slow">Slow, careful swipes</option>
+          <option value="normal" selected>Normal</option>
+          <option value="fast">Fast, short swipes</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions"><button type="submit">Generate settings</button></div>
+  </form>
+
+  <section class="result" id="out" hidden aria-live="polite">
+    <div id="rows"></div>
+    <div class="actions">
+      <button type="button" id="copy">Copy settings</button>
+      <button type="button" class="ghost" id="dl">Download .txt</button>
+      <button type="button" class="ghost" id="reroll">Nudge values</button>
+    </div>
+    <div class="toast" id="toast"></div>
+    <p class="note">These are suggested starting values, not official Garena numbers. Free Fire has no single perfect setting because it depends on your hands, screen and habits. Test in the Training Ground, then change any value by 3 to 5 points at a time.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var $ = function(id){return document.getElementById(id)};
+  var KEYS = ["General","Red Dot","2x Scope","4x Scope","Sniper Scope","AWM Scope","Free Look"];
+  var ADS_KEYS = ["Red Dot","2x Scope","4x Scope","Sniper Scope","AWM Scope"];
+
+  // Base values per play style (camera sensitivity), scale 0-100.
+  var BASE = {
+    rush:     {"General":92,"Red Dot":88,"2x Scope":84,"4x Scope":78,"Sniper Scope":70,"AWM Scope":62,"Free Look":80},
+    balanced: {"General":86,"Red Dot":82,"2x Scope":78,"4x Scope":72,"Sniper Scope":64,"AWM Scope":56,"Free Look":75},
+    sniper:   {"General":78,"Red Dot":74,"2x Scope":72,"4x Scope":70,"Sniper Scope":66,"AWM Scope":60,"Free Look":70},
+    head:     {"General":84,"Red Dot":86,"2x Scope":80,"4x Scope":74,"Sniper Scope":66,"AWM Scope":58,"Free Look":76}
+  };
+  var lastNudge = 0, current = null;
+
+  function clamp(n){return Math.max(1, Math.min(100, Math.round(n)))}
+
+  function generate(nudge){
+    var screen = parseFloat($("screen").value);
+    var device = $("device").value;
+    if (isNaN(screen) || screen < 4 || screen > 13) { return null; }
+    var perf = $("perf").value, style = $("style").value;
+    var claw = parseInt($("claw").value, 10), hand = $("hand").value;
+    var base = BASE[style], out = {};
+
+    // Bigger screens need less sensitivity because swipes travel further.
+    var screenAdj = (6.5 - screen) * 3.2;
+    if (device === "tablet") screenAdj -= 6;
+    // Low-end phones drop frames; slightly lower values feel steadier.
+    var perfAdj = perf === "low" ? -5 : perf === "high" ? 3 : 0;
+    // More fingers give more control, so a bit more speed is manageable.
+    var clawAdj = claw === 4 ? 3 : claw === 2 ? -3 : 0;
+    var handAdj = hand === "fast" ? -5 : hand === "slow" ? 6 : 0;
+
+    KEYS.forEach(function(k, i){
+      var jitter = nudge ? (((nudge * (i + 3) * 7) % 7) - 3) : 0;
+      out[k] = clamp(base[k] + screenAdj + perfAdj + clawAdj + handAdj + jitter);
+    });
+    // Keep ADS values stepping down with zoom level.
+    for (var i = 1; i < ADS_KEYS.length; i++){
+      if (out[ADS_KEYS[i]] > out[ADS_KEYS[i-1]]) out[ADS_KEYS[i]] = out[ADS_KEYS[i-1]];
+    }
+    return out;
+  }
+
+  function row(name, v){
+    return '<div class="row"><span class="name">'+name+'</span><div class="bar"><i style="width:'+v+'%"></i></div><span class="val">'+v+'</span></div>';
+  }
+
+  function render(s){
+    var html = '<div class="group">Camera sensitivity</div>' + row("General", s["General"]);
+    html += '<div class="group">ADS sensitivity</div>';
+    ADS_KEYS.forEach(function(k){ html += row(k, s[k]); });
+    html += '<div class="group">Free Look</div>' + row("Free Look", s["Free Look"]);
+    $("rows").innerHTML = html;
+    $("out").hidden = false;
+  }
+
+  function asText(s){
+    var lines = ["Free Fire Sensitivity (starting values)"];
+    KEYS.forEach(function(k){ lines.push(k + ": " + s[k]); });
+    return lines.join("\n");
+  }
+
+  function toast(msg){
+    $("toast").textContent = msg;
+    setTimeout(function(){ $("toast").textContent = ""; }, 2500);
+  }
+
+  function save(){
+    try { localStorage.setItem("ffs-form", JSON.stringify({
+      device:$("device").value, screen:$("screen").value, perf:$("perf").value,
+      style:$("style").value, claw:$("claw").value, hand:$("hand").value })); } catch(e){}
+  }
+  function load(){
+    try {
+      var d = JSON.parse(localStorage.getItem("ffs-form") || "null");
+      if (d) Object.keys(d).forEach(function(k){ if ($(k)) $(k).value = d[k]; });
+    } catch(e){}
+  }
+
+  $("f").addEventListener("submit", function(e){
+    e.preventDefault();
+    lastNudge = 0;
+    var s = generate(0);
+    if (!s){ toast("Enter a screen size between 4 and 13 inches."); return; }
+    current = s; save(); render(s);
+  });
+
+  $("reroll").addEventListener("click", function(){
+    lastNudge++;
+    var s = generate(lastNudge);
+    if (s){ current = s; render(s); }
+  });
+
+  $("copy").addEventListener("click", function(){
+    if (!current) return;
+    var text = asText(current);
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast("Copied."); },
+        function(){ toast("Copy failed. Select the values manually."); });
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast("Copied."); } catch(e){ toast("Copy failed."); }
+      document.body.removeChild(ta);
+    }
+  });
+
+  $("dl").addEventListener("click", function(){
+    if (!current) return;
+    var blob = new Blob([asText(current)], {type:"text/plain"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "free-fire-sensitivity.txt";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+  });
+
+  load();
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
